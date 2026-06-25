@@ -12,7 +12,7 @@
         * { box-sizing: border-box; }
         body {
             font-family: 'Poppins', sans-serif;
-            margin: 0; padding: 20px 15px; min-height: 100vh;
+            margin: 0; padding: 20px 15px 0 15px; min-height: 100vh;
             display: flex; flex-direction: column; align-items: center;
             background: linear-gradient(135deg, #ff9a9e 0%, #fecfef 99%, #fecfef 100%);
             color: #333; overflow-x: hidden;
@@ -42,6 +42,7 @@
             border: 1px solid rgba(255, 255, 255, 0.5); border-radius: 20px;
             padding: 20px; box-shadow: 0 8px 32px 0 rgba(31, 38, 135, 0.15);
             text-align: center; width: 100%; max-width: 500px; margin-bottom: 25px;
+            z-index: 10;
         }
 
         .glass-panel h2 { margin: 0 0 10px 0; color: #ad1457; font-weight: 600; font-size: 1.5rem; }
@@ -55,21 +56,20 @@
 
         .main-container {
             display: flex; flex-direction: column; align-items: center;
-            gap: 25px; width: 100%; max-width: 900px;
+            gap: 25px; width: 100%; max-width: 900px; z-index: 10;
         }
 
         .camera-section { display: flex; flex-direction: column; align-items: center; }
 
         .camera-label {
             font-size: 0.75rem; color: #d81b60; font-weight: 600; text-transform: uppercase;
-            letter-spacing: 2px; margin-bottom: 8px; background: rgba(255,255,255,0.5);
+            letter-spacing: 2px; margin-bottom: 8px; background: rgba(255,255,255,0.7);
             padding: 4px 12px; border-radius: 12px;
         }
 
         .webcam-wrapper {
             position: relative; width: 220px; height: 165px; border-radius: 16px;
             overflow: hidden; box-shadow: 0 8px 20px rgba(0,0,0,0.15); border: 3px solid white;
-            /* Tambahan untuk performa UI */
             transform: translateZ(0); 
         }
         
@@ -103,6 +103,39 @@
             .webcam-wrapper { width: 260px; height: 195px; }
             .video-wrapper { max-width: 360px; }
         }
+
+        /* --- TAMBAHAN: HIASAN TAMAN BUNGA DI BAWAH --- */
+        .floral-decor {
+            margin-top: auto; /* Memaksa bunga turun ke bagian paling bawah web */
+            width: 100%;
+            max-width: 800px;
+            display: flex;
+            justify-content: space-evenly;
+            align-items: flex-end;
+            padding-top: 40px;
+            padding-bottom: 10px;
+            pointer-events: none; /* Biar ngga ganggu kalau ngga sengaja keklik */
+            z-index: 1;
+        }
+
+        .flower {
+            opacity: 0.85;
+            filter: drop-shadow(0px 8px 10px rgba(216, 27, 96, 0.2));
+            animation: sway 4s ease-in-out infinite alternate;
+            transform-origin: bottom center; /* Goyangnya dari tangkai (bawah) */
+        }
+
+        /* Ukuran dan kecepatan ayun tiap bunga dibikin beda biar natural */
+        .f1 { width: clamp(40px, 10vw, 70px); animation-delay: 0.2s; }
+        .f2 { width: clamp(50px, 12vw, 85px); animation-delay: 1.5s; }
+        .f3 { width: clamp(65px, 15vw, 100px); animation-delay: 0.7s; } /* Hibiscus (Tengah) */
+        .f4 { width: clamp(50px, 12vw, 85px); animation-delay: 2.1s; }
+        .f5 { width: clamp(40px, 10vw, 70px); animation-delay: 0.9s; }
+
+        @keyframes sway {
+            0% { transform: rotate(-8deg) translateY(0); }
+            100% { transform: rotate(8deg) translateY(-5px); }
+        }
     </style>
 </head>
 <body>
@@ -125,12 +158,21 @@
         </div>
         
         <div class="video-wrapper" id="videoWrapper">
-            <!-- JANGAN LUPA: Atribut 'loop' sudah ditambahkan di sini -->
             <video id="targetVideo" controls loop>
                 <!-- PASTIKAN NAMA FILE VIDEO SESUAI -->
                 <source src="vidio.mp4" type="video/mp4">
             </video>
         </div>
+    </div>
+
+    <!-- HIASAN TAMAN BUNGA ANIMASI -->
+    <div class="floral-decor">
+        <!-- Kamu bisa nambahin atau ngurangin bunga dengan copy-paste baris di bawah -->
+        <img src="https://api.iconify.design/twemoji:cherry-blossom.svg" alt="Sakura" class="flower f1">
+        <img src="https://api.iconify.design/twemoji:tulip.svg" alt="Tulip" class="flower f2">
+        <img src="https://api.iconify.design/twemoji:hibiscus.svg" alt="Hibiscus" class="flower f3">
+        <img src="https://api.iconify.design/twemoji:rose.svg" alt="Mawar" class="flower f4">
+        <img src="https://api.iconify.design/twemoji:cherry-blossom.svg" alt="Sakura" class="flower f5">
     </div>
 
     <script type="module">
@@ -148,16 +190,15 @@
         let runningMode = "VIDEO";
         let lastVideoTime = -1;
         let hasTriggeredBirthday = false; 
-
-        // OPTIMASI: Pembatas kecepatan AI
+        
         let lastInferenceTime = 0;
-        const FPS_LIMIT = 12; // Cek gestur 12 kali per detik (lebih ringan untuk HP)
+        const FPS_LIMIT = 12; 
         const frameInterval = 1000 / FPS_LIMIT;
 
         function shootConfetti() {
             var duration = 3 * 1000;
             var animationEnd = Date.now() + duration;
-            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 0 };
+            var defaults = { startVelocity: 30, spread: 360, ticks: 60, zIndex: 99 };
             function randomInRange(min, max) { return Math.random() * (max - min) + min; }
 
             var interval = setInterval(function() {
@@ -175,7 +216,7 @@
                 gestureRecognizer = await GestureRecognizer.createFromOptions(vision, {
                     baseOptions: {
                         modelAssetPath: "https://storage.googleapis.com/mediapipe-models/gesture_recognizer/gesture_recognizer/float16/1/gesture_recognizer.task",
-                        delegate: "GPU" // Coba gunakan GPU HP jika tersedia
+                        delegate: "GPU" 
                     },
                     runningMode: runningMode
                 });
@@ -188,7 +229,6 @@
 
         async function startWebcam() {
             try {
-                // OPTIMASI: Minta resolusi rendah & utamakan kamera depan
                 const stream = await navigator.mediaDevices.getUserMedia({ 
                     video: { 
                         facingMode: "user",
@@ -207,8 +247,6 @@
             if (!gestureRecognizer) return;
 
             let now = performance.now();
-
-            // OPTIMASI: Hanya proses AI jika sudah lewat jeda interval (Throttle Frame Rate)
             if (now - lastInferenceTime >= frameInterval) {
                 lastInferenceTime = now;
 
@@ -255,7 +293,6 @@
                     }
                 }
             }
-            
             window.requestAnimationFrame(predictWebcam);
         }
 
